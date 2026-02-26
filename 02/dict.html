@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>독도 용어 사전</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
+        body { font-family: 'Noto Sans KR', sans-serif; }
+        .category-btn.active { background-color: #1e40af; color: white; border-color: #1e40af; }
+        .term-card { transition: all 0.3s ease; }
+        .term-card:hover { transform: translateY(-3px); }
+        .gradient-header { background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%); }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 pb-20">
+
+    <!-- 상단 내비게이션 바 -->
+    <nav class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-slate-200">
+        <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <i class="fas fa-book-atlas text-blue-600 text-xl"></i>
+                <h1 class="font-bold text-lg tracking-tight text-slate-800">독도 용어 사전</h1>
+            </div>
+            <div class="flex items-center gap-2">
+                <!-- 홈 버튼: 상위 디렉토리로 이동 -->
+                <a href="../index.html" class="flex items-center gap-2 px-4 py-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-sm transition-all shadow-sm" title="홈으로 이동">
+                    <i class="fas fa-home"></i>
+                    <span class="hidden sm:inline">홈</span>
+                </a>
+                <!-- 독도보고서 버튼: 현재 디렉토리의 index로 이동 -->
+                <a href="./index.html" class="flex items-center gap-2 px-4 py-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm transition-all shadow-sm" title="독도보고서로 이동">
+                    <i class="fas fa-file-alt"></i>
+                    <span class="hidden sm:inline">독도보고서</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header Section -->
+    <header class="gradient-header text-white pt-32 pb-16 px-4">
+        <div class="max-w-6xl mx-auto flex flex-col items-center">
+            <h1 class="text-4xl md:text-5xl font-black mb-4 text-center">독도의 기록을 읽다</h1>
+            <p class="text-blue-100 text-lg md:text-xl text-center max-w-2xl font-light">
+                지리부터 역사, 국제법적 지위까지 독도와 관련된 <span class="text-yellow-400 font-bold">주요 용어</span>를 체계적으로 정리했습니다.
+            </p>
+        </div>
+    </header>
+
+    <!-- Navigation / Filter -->
+    <nav class="sticky top-16 z-40 bg-white shadow-sm border-b border-slate-200">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex flex-wrap justify-center gap-2">
+            <button onclick="filterTerms('all')" class="category-btn active px-4 py-2 rounded-full border border-slate-300 text-sm font-bold transition-all hover:bg-slate-100">전체보기</button>
+            <button onclick="filterTerms('zone')" class="category-btn px-4 py-2 rounded-full border border-slate-300 text-sm font-bold transition-all hover:bg-slate-100">영역/해양</button>
+            <button onclick="filterTerms('name')" class="category-btn px-4 py-2 rounded-full border border-slate-300 text-sm font-bold transition-all hover:bg-slate-100">역사적 명칭</button>
+            <button onclick="filterTerms('doc')" class="category-btn px-4 py-2 rounded-full border border-slate-300 text-sm font-bold transition-all hover:bg-slate-100">문서/조약</button>
+            <button onclick="filterTerms('people')" class="category-btn px-4 py-2 rounded-full border border-slate-300 text-sm font-bold transition-all hover:bg-slate-100">인물/단체</button>
+            <button onclick="filterTerms('resource')" class="category-btn px-4 py-2 rounded-full border border-slate-300 text-sm font-bold transition-all hover:bg-slate-100">자원/지질</button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-6xl mx-auto px-4 py-12">
+        <div id="dictionary-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- 용어들이 여기에 렌더링됩니다 -->
+        </div>
+    </main>
+
+    <!-- Modal for details -->
+    <div id="modal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black/50 p-4">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-8 shadow-2xl relative">
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+                <i class="fas fa-times text-2xl"></i>
+            </button>
+            <div id="modal-content">
+                <!-- 모달 내용 -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const terms = [
+            { id: 1, cat: 'zone', title: '영토 (領土)', desc: '국가의 영역이 미치는 지표상의 범위를 의미합니다.', detail: '국민, 주권과 함께 국가를 구성하는 3대 요소 중 하나로, 국가의 입법·사법·행정권이 절대적으로 행사되는 공간입니다.' },
+            { id: 2, cat: 'zone', title: '영해 (領海)', desc: '해안선으로부터 일정한 범위 내에 있는 바다입니다.', detail: '보통 영해 기선에서 12해리(약 22.2km)까지를 의미하며, 연안국의 주권이 미치는 수역입니다.' },
+            { id: 3, cat: 'zone', title: '영공 (領空)', desc: '영토와 영해의 수직 상공을 뜻합니다.', detail: '통상적으로 대기권 이내를 의미하며, 국가 안보 및 항공 주권의 핵심 범위입니다.' },
+            { id: 4, cat: 'zone', title: '배타적 경제수역 (EEZ)', desc: '연안국이 경제적 주권을 갖는 200해리 수역입니다.', detail: '영해 기선으로부터 200해리까지의 범위로, 어업 자원 및 해저 광물 자원의 탐사·개발권을 독점합니다.' },
+            { id: 5, cat: 'zone', title: '중간수역 (잠정수역)', desc: '한일 양국의 EEZ가 중첩되는 부분을 지정한 수역입니다.', detail: '신한일 어업협정 체결 시 합의된 수역으로, 독도가 이 구역 내에 위치하고 있습니다.' },
+            { id: 6, cat: 'name', title: '우산도 (于山島)', desc: '삼국시대 우산국에서 유래한 가장 오래된 명칭입니다.', detail: '신라 지증왕 때 이사부 장군에 의해 우산국이 복속된 이후 기록에 나타나는 우리식 지명입니다.' },
+            { id: 7, cat: 'name', title: '석도 (石島)', desc: '돌로 이루어진 섬이라는 뜻의 한자 표기입니다.', detail: '1900년 대한제국 칙령 제41호에서 독도를 지칭할 때 사용된 공식 명칭입니다.' },
+            { id: 8, cat: 'name', title: '리앙쿠르 (Liancourt)', desc: '1849년 프랑스 포경선이 붙인 서양식 이름입니다.', detail: '프랑스 배 리앙쿠르호가 발견하여 명명되었으며, 현재도 서양의 일부 지도에서 발견됩니다.' },
+            { id: 9, cat: 'doc', title: '대한제국 칙령 제41호', desc: '독도를 울도군 관할로 명시한 1900년의 법령입니다.', detail: '근대적 주권 선포의 핵심 사료로, 독도를 ‘석도’로 명칭하고 울릉도의 부속 도서로 공식화했습니다.' },
+            { id: 10, cat: 'doc', title: '태정관 지령', desc: '일본 스스로 독도가 자국 영토가 아님을 인정한 문서입니다.', detail: '1877년 일본 최고 행정기관 태정관이 ‘울릉도와 독도는 일본과 관계가 없다’고 공식 명령했습니다.' },
+            { id: 11, cat: 'doc', title: '세종실록지리지', desc: '우산(독도)과 무릉(울릉도)의 위치를 기록한 사료입니다.', detail: '1454년 편찬되었으며, 두 섬이 맑은 날 서로 바라볼 수 있다는 지리적 가시성을 기록했습니다.' },
+            { id: 12, cat: 'people', title: '안용복', desc: '일본으로부터 도해 금지령을 이끌어낸 조선의 영웅입니다.', detail: '숙종 때 일본에 건너가 독도가 조선 땅임을 강력히 주장하고 일본 어민의 침범을 막아냈습니다.' },
+            { id: 13, cat: 'people', title: '독도의용수비대', desc: '한국전쟁 시기 독도를 자발적으로 지킨 민간 단체입니다.', detail: '1953년부터 홍순칠 대장 등 33명의 대원이 무장 침투하는 일본 세력을 격퇴하며 수호했습니다.' },
+            { id: 14, cat: 'people', title: '최종덕', desc: '독도에 최초로 주민등록을 이전한 주민입니다.', detail: '1968년부터 독도에 거주하며 실질적인 유인도화를 위해 노력한 최초의 독도 주민입니다.' },
+            { id: 15, cat: 'resource', title: '가스 하이드레이트', desc: '해저에 매장된 차세대 고체 에너지 자원입니다.', detail: '‘불타는 얼음’이라 불리며, 독도 부근에 약 6억 톤 가량이 매장되어 있는 것으로 추정됩니다.' },
+            { id: 16, cat: 'resource', title: '대화퇴 어장', desc: '독도 동북쪽에 위치한 황금어장입니다.', detail: '한류와 난류가 교차하는 조경 수역으로, 수산 자원이 매우 풍부하여 경제적 가치가 큽니다.' },
+            { id: 17, cat: 'resource', title: '해산 (海山)', desc: '해저 화산 활동으로 형성된 산 모양의 지형입니다.', detail: '독도는 거대한 해저산의 꼭대기 부분이며, 지질학적으로 울릉도와 형제 관계에 있습니다.' }
+        ];
+
+        function renderTerms(filteredTerms) {
+            const grid = document.getElementById('dictionary-grid');
+            grid.innerHTML = '';
+            
+            filteredTerms.forEach(term => {
+                const icon = getIcon(term.cat);
+                const color = getColor(term.cat);
+                
+                grid.innerHTML += `
+                    <div class="term-card bg-white p-6 rounded-2xl shadow-sm border border-slate-200 cursor-pointer hover:shadow-lg" 
+                         onclick="openModal(${term.id})">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="${color} w-10 h-10 rounded-lg flex items-center justify-center text-white">
+                                <i class="fas ${icon}"></i>
+                            </span>
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">${getCategoryName(term.cat)}</span>
+                        </div>
+                        <h3 class="text-xl font-bold mb-2 text-slate-800">${term.title}</h3>
+                        <p class="text-slate-600 text-sm leading-relaxed">${term.desc}</p>
+                        <div class="mt-4 text-blue-600 text-xs font-bold flex items-center">
+                            자세히 보기 <i class="fas fa-arrow-right ml-1"></i>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function getIcon(cat) {
+            switch(cat) {
+                case 'zone': return 'fa-globe-asia';
+                case 'name': return 'fa-tag';
+                case 'doc': return 'fa-file-signature';
+                case 'people': return 'fa-users';
+                case 'resource': return 'fa-gem';
+                default: return 'fa-book';
+            }
+        }
+
+        function getColor(cat) {
+            switch(cat) {
+                case 'zone': return 'bg-blue-600';
+                case 'name': return 'bg-amber-500';
+                case 'doc': return 'bg-indigo-600';
+                case 'people': return 'bg-emerald-600';
+                case 'resource': return 'bg-purple-600';
+                default: return 'bg-slate-600';
+            }
+        }
+
+        function getCategoryName(cat) {
+            switch(cat) {
+                case 'zone': return '영역 및 해양';
+                case 'name': return '역사적 명칭';
+                case 'doc': return '문서 및 조약';
+                case 'people': return '인물 및 단체';
+                case 'resource': return '자원 및 지질';
+                default: return '기타';
+            }
+        }
+
+        function filterTerms(category) {
+            const btns = document.querySelectorAll('.category-btn');
+            btns.forEach(btn => {
+                btn.classList.remove('active');
+                if(btn.innerText.includes(getCategoryName(category)) || (category === 'all' && btn.innerText === '전체보기')) {
+                    btn.classList.add('active');
+                }
+            });
+
+            if(category === 'all') {
+                renderTerms(terms);
+            } else {
+                renderTerms(terms.filter(t => t.cat === category));
+            }
+        }
+
+        function openModal(id) {
+            const term = terms.find(t => t.id === id);
+            const content = document.getElementById('modal-content');
+            const color = getColor(term.cat);
+            
+            content.innerHTML = `
+                <div class="mb-6">
+                    <span class="${color} text-white text-[10px] font-black px-2 py-1 rounded-md uppercase mb-2 inline-block">
+                        ${getCategoryName(term.cat)}
+                    </span>
+                    <h2 class="text-3xl font-black text-slate-800">${term.title}</h2>
+                </div>
+                <div class="space-y-4">
+                    <div class="bg-slate-50 p-4 rounded-xl border-l-4 border-slate-300">
+                        <p class="text-slate-700 font-medium">${term.desc}</p>
+                    </div>
+                    <p class="text-slate-600 leading-relaxed text-sm">
+                        ${term.detail}
+                    </p>
+                </div>
+                <button onclick="closeModal()" class="mt-8 w-full bg-slate-900 text-white py-3 rounded-xl font-bold hover:bg-slate-800 transition-colors">
+                    확인
+                </button>
+            `;
+            document.getElementById('modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.add('hidden');
+        }
+
+        // 초기 렌더링
+        window.onload = () => renderTerms(terms);
+    </script>
+</body>
+</html>
